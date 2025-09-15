@@ -6,6 +6,7 @@ Takes a TIF image as input and produces a label image using StarDist 2D model
 
 import argparse
 import sys
+from glob import glob
 from pathlib import Path
 
 import numpy as np
@@ -107,19 +108,23 @@ Examples:
         """
     )
 
-    parser.add_argument('-i', '--input', help='Path to input TIF image file')
-    parser.add_argument('-o', '--output', help='Path for output label image (optional)')
+    parser.add_argument('-i', '--input', help='Path to input TIF image directory', type=str)
+    parser.add_argument('-f', '--from_index', help='Start file index', type=int)
+    parser.add_argument('-t', '--to_index', help='Last file index', type=int)
+    parser.add_argument('-o', '--output', help='Path for output label image (optional)', type=str)
     parser.add_argument('--info', action='store_true', help='Print additional information about detected objects')
     args = parser.parse_args()
 
-    try:
-        labels, details = process_image(args.input, args.output)
+    file_list = glob(f'{args.input}/*.tif')
 
-        if args.info:
-            print("\n=== Additional Information ===")
-            print(f"Object centers: {len(details['points'])} points")
-            print(f"Probability scores range: {np.min(details['prob']):.3f} - {np.max(details['prob']):.3f}")
-            print(f"Label range: {np.min(labels)} - {np.max(labels)}")
+    try:
+        for i in range(args.from_index, args.to_index):
+            labels, details = process_image(file_list[i], args.output)
+            if args.info:
+                print("\n=== Additional Information ===")
+                print(f"Object centers: {len(details['points'])} points")
+                print(f"Probability scores range: {np.min(details['prob']):.3f} - {np.max(details['prob']):.3f}")
+                print(f"Label range: {np.min(labels)} - {np.max(labels)}")
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
