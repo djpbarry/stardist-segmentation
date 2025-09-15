@@ -116,6 +116,9 @@ Examples:
     args = parser.parse_args()
 
     file_list = glob(f'{args.input}/*.tif')
+    file_list.sort()
+
+    print(f"Processing files from index {args.from_index} to {(args.to_index - 1)}.")
 
     try:
         for i in range(args.from_index, args.to_index):
